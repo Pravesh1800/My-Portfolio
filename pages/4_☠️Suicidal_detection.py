@@ -13,11 +13,11 @@ PAGE_TITLE = "Sucidal Tendency Detection | RNN"
 PAGE_ICON = "☠️"
 st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON)
 
-model = load_model("Sucidal_classification.keras")
+model = load_model("Sucidal_classification\Sucidal_classification.keras")
 
 
 st.title("Titanic Survival Prediction")
-st.image('img.jpg',use_column_width=True)
+st.image('Sucidal_classification\img.jpg',use_column_width=True)
 st.write("Please enter the text you want to analyze in the text box and you will get the result as suicidal if the text has suicidal tendency or non suicidal if the text has non-suicidal tendency")
 
 text = st.text_input("Enter the text you want to check")
@@ -41,9 +41,9 @@ posibility = pred.round(4)
 if text :
     if posibility<0.5:
         st.info("This text does not have a sucidal tendency.")
-        st.image('non-sucidal.gif', use_column_width=True)
+        st.image('Sucidal_classification\non-sucidal.gif', use_column_width=True)
 
     else:
         st.warning("This text may have sucidal tendency.")
-        st.image('sucidal.gif', use_column_width=True)
+        st.image('Sucidal_classification\sucidal.gif', use_column_width=True)
         st.write(posibility)

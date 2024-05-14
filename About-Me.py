@@ -9,12 +9,12 @@ st.sidebar.markdown('## Navigation Bar')
 
 # Adding the basic info about me nd the Display Pic
 dp, details = st.columns(2)
-dp.image("CV/profile-pic.png",width=270)
+dp.image("./profile-pic.png",width=270)
 
 with details:
     st.title('Pravesh Singh')
     st.write("A Quick learning individual looking for a potential chance to work in the Machine Learning space")
-    with open("CV/CV.pdf", "rb") as f:
+    with open("./CV.pdf", "rb") as f:
         pdf_data = f.read()
     
     st.download_button(
