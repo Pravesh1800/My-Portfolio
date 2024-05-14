@@ -8,6 +8,7 @@ import re
 from nltk.corpus import stopwords
 from nltk.stem.porter import PorterStemmer
 ps = PorterStemmer()
+nltk.download('stopwords')
 
 PAGE_TITLE = "Sucidal Tendency Detection | RNN"
 PAGE_ICON = "☠️"
