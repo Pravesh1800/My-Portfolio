@@ -13,7 +13,7 @@ PAGE_TITLE = "Sucidal Tendency Detection | RNN"
 PAGE_ICON = "☠️"
 st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON)
 
-model = load_model("Sucidal_classification\Sucidal_classification.keras")
+model = load_model("dal_classification\Sucidal_classification.keras")
 
 
 st.title("Titanic Survival Prediction")
