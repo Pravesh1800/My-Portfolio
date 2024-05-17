@@ -8,9 +8,6 @@ PAGE_TITLE = "Banglore House Price Prediction | Machine Larning"
 PAGE_ICON = "🏠"
 st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON)
 
-st.sidebar.markdown(" ### Navigation Bar")
-
-
 model = joblib.load("./house/model.joblib")
 encoder = joblib.load("./house/encoder.joblib")
 
