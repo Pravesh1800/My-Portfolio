@@ -329,7 +329,7 @@ if selected == "☠️ Suicidal Detection":
     from nltk.stem.porter import PorterStemmer
     ps = PorterStemmer()
 
-    model = load_model("./Sucidal_classification/Sucidal_classification.keras")
+    model = load_model("Sucidal_classification/Sucidal_classification.keras")
 
 
     st.title("Titanic Survival Prediction")
