@@ -329,10 +329,10 @@ if selected == "☠️ Suicidal Detection":
     from nltk.stem.porter import PorterStemmer
     ps = PorterStemmer()
 
-    model = load_model("./Sucidal_classification/Sucidal_classification.keras")
+    model = load_model("Sucidal_classification/Sucidal_classification.keras")
 
 
-    st.title("Titanic Survival Prediction")
+    st.title("Sucidal text classification")
     st.image('Sucidal_classification\img.jpg',use_column_width=True)
     st.write("Please enter the text you want to analyze in the text box and you will get the result as suicidal if the text has suicidal tendency or non suicidal if the text has non-suicidal tendency")
 
