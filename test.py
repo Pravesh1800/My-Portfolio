@@ -381,14 +381,14 @@ if selected == "☠️ Suicidal Detection":
 
 #======================================================================================== Image Classification ============================================================================================================================    
 if selected == '📸 Image Classification':
+    st.title("Image Classification")
+
     import streamlit as st
     import os
     import tensorflow as tf
     from tensorflow.keras.preprocessing import image_dataset_from_directory
     from PIL import Image
     import numpy as np
-
-    st.title("Multiple Image Uploader")
 
     # Prompt user for the number of classes
     num_classes = st.number_input("Enter the number of classes", min_value=1, step=1)
@@ -420,7 +420,7 @@ if selected == '📸 Image Classification':
 
     def main():
         train_dir = "train_data"
-        os.makedirs(train_dir, exist_ok=True)
+        os.makedirs(train_dir, exist_ok=True) 
 
         for i in range(num_classes):
             st.header(f"Class {i+1}")
@@ -460,8 +460,29 @@ if selected == '📸 Image Classification':
         
         st.header(" Training the Model")
         global epoch
-        epoch = st.slider("Enter the no of epochs you want to run.")    
+        epoch = st.slider("Enter the no of epochs you want to run.")
 
+
+        ################
+        import cv2
+        import imghdr
+        
+        data_dir = "train_data"
+        image_ext = ['jpg','jpeg','png']
+        
+        for image_class in os.listdir(data_dir):
+            for image in os.listdir(os.path.join(data_dir,image_class)):
+                image_path = os.path.join(data_dir,image_class,image)
+                try:
+                    img = cv2.imread(image_path)
+                    tip = imghdr.what(image_path)
+                    if tip not in image_ext:
+                        print("image not in extension list",image_path)
+                        os.remove(image_path)
+                except Exception as e:
+                    print("Issue with image",image_path) 
+            
+        ################
 
         if st.button("Train Model"):
             train(model, data)
@@ -475,6 +496,7 @@ if selected == '📸 Image Classification':
             uploaded_image = st.camera_input("Capture a image to be predicted")
 
         if uploaded_image is not None:
+            
             image = Image.open(uploaded_image)
             image = image.resize((224, 224))
             st.image(image, caption='Uploaded Image', use_column_width=True)
@@ -541,7 +563,6 @@ if selected == "🛳️ Titanic Survival Prediction":
     input_data = input_data.drop(columns=cols_test)
 
     encoded_data_test = pd.concat([input_data, encoded_df_test], axis=1)
-
 
     if st.button("Submit"):
 
