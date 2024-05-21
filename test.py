@@ -22,7 +22,7 @@ with st.sidebar:
 if selected == '🧔🏽‍♂️ About Me':
     # Adding the basic info about me nd the Display Pic
     dp, details = st.columns(2)
-    dp.image("./profile-pic.png",width=270)
+    dp.image("./profile-pic.jpg",width=270)
 
     with details:
         st.title('Pravesh Singh')
@@ -334,182 +334,303 @@ if selected == "☠️ Suicidal Detection":
     ps = PorterStemmer()
 
 
-    st.write(zipfile.is_zipfile(
-        "Sucidal_classification/Sucidal_classification.keras"
-    ))
-
-    
-    if Path("Sucidal_classification/Sucidal_classification.keras").exists() == False :
-        st.write("Model might be downloading, please wait.....")
-    
-    else:
-        model = load_model("Sucidal_classification/Sucidal_classification.keras")
+    model = load_model("Sucidal_classification/Sucidal_classification.keras")
 
 
-        st.title("Sucidal text classification")
-        st.image('Sucidal_classification/img.jpg',use_column_width=True)
-        st.write("Please enter the text you want to analyze in the text box and you will get the result as suicidal if the text has suicidal tendency or non suicidal if the text has non-suicidal tendency")
+    st.title("Sucidal text classification")
+    st.image('Sucidal_classification/img.jpg',use_column_width=True)
+    st.write("Please enter the text you want to analyze in the text box and you will get the result as suicidal if the text has suicidal tendency or non suicidal if the text has non-suicidal tendency")
 
-        text = st.text_input("Enter the text you want to check")
-
-
-        voc_size = 5000
-        sent_length = 70
+    text = st.text_input("Enter the text you want to check")
 
 
-        sen = re.sub('[^a-zA-Z]',' ', text)
-        sen = sen.lower()
-        sen = sen.split()
-        sen = [ps.stem(word) for word in sen if not word in stopwords.words('english')]
-        sen = ' '.join(sen)
-        encoded_sen = [one_hot(sen,voc_size)]
-        embeded_sen = pad_sequences(encoded_sen,padding='post',maxlen = sent_length)
+    voc_size = 5000
+    sent_length = 70
 
-        pred = model.predict(embeded_sen)
-        posibility = pred.round(4)
 
-        if text :
-            if posibility<0.5:
-                st.info("This text does not have a sucidal tendency.")
-                st.image('Sucidal_classification/non-sucidal.gif', use_column_width=True)
+    sen = re.sub('[^a-zA-Z]',' ', text)
+    sen = sen.lower()
+    sen = sen.split()
+    sen = [ps.stem(word) for word in sen if not word in stopwords.words('english')]
+    sen = ' '.join(sen)
+    encoded_sen = [one_hot(sen,voc_size)]
+    embeded_sen = pad_sequences(encoded_sen,padding='post',maxlen = sent_length)
 
-            else:
-                st.warning("This text may have sucidal tendency.")
-                st.image('Sucidal_classification\sucidal.gif', use_column_width=True)
-                st.write(posibility)
+    pred = model.predict(embeded_sen)
+    posibility = pred.round(4)
+
+    if text :
+        if posibility<0.5:
+            st.info("This text does not have a sucidal tendency.")
+            st.image('Sucidal_classification/non-sucidal.gif', use_column_width=True)
+
+        else:
+            st.warning("This text may have sucidal tendency.")
+            st.image('Sucidal_classification/sucidal.gif', use_column_width=True)
+            st.write(posibility)
 
 
 #======================================================================================== Image Classification ============================================================================================================================    
 if selected == '📸 Image Classification':
     st.title("Image Classification")
 
-    import streamlit as st
-    import os
-    import tensorflow as tf
-    from tensorflow.keras.preprocessing import image_dataset_from_directory
-    from PIL import Image
-    import numpy as np
+    #if 'start' not in st.session_state or st.session_state['start'] == False :
+    st.write("")
+    choose = st.selectbox("Choose to train the model or read the instructions",("Instructions","Train"))
+    if choose == "Train":
 
-    # Prompt user for the number of classes
-    num_classes = st.number_input("Enter the number of classes", min_value=1, step=1)
-
-    # Building the model
-    from tensorflow.keras import layers
-    from tensorflow.keras.models import Sequential
-    from tensorflow.keras.applications import ResNet101
-
-    def build_model(num_classes):
-        base_model = ResNet101  (weights='imagenet', include_top=False, input_shape=(224, 224, 3))
-        base_model.trainable = False
-        model = Sequential([
-            base_model,
-            layers.GlobalAveragePooling2D(),
-            layers.Dense(num_classes, activation='softmax')
-        ])
-        model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01),
-                    loss='categorical_crossentropy',
-                    metrics=['accuracy'])
-        return model
-
-    def train(model, data):
-        status_text = st.empty()  # Create an empty element for dynamic updating
-        for epoc in range(epoch):
-            model.fit(data, epochs=1)  # Train for 1 epoch at a time
-            status_text.write(f"Epoch {epoc + 1} / {epoch} completed")  # Update the status
-        #model.save('image_classification.keras')
-
-    def main():
-        train_dir = "train_data"
-        os.makedirs(train_dir, exist_ok=True) 
-
-        for i in range(num_classes):
-            st.header(f"Class {i+1}")
-            class_name = st.text_input(f"Enter the name of class {i+1}")
-            form_key = f"class_{i}_{class_name}_uploader"
-            with st.form(key=form_key):
-                file_uploader_key = f"class_{i}_{class_name}_uploader"
-                uploaded_files = st.file_uploader(f"Choose images for class {class_name}", key=file_uploader_key, accept_multiple_files=True, type=['png', 'jpg', 'jpeg'])
-                submit_button = st.form_submit_button(label='Submit')
-                if submit_button:
-                    if uploaded_files:
-                        st.write("Sample Images:")
-                        num_images = min(len(uploaded_files), 5)
-                        num_columns = min(num_images, 5)
-                        columns = st.columns(num_columns)
-                        for i, uploaded_file in enumerate(uploaded_files[:num_images]):
-                            columns[i].image(uploaded_file, caption=uploaded_file.name, use_column_width=True)
-                        class_dir = os.path.join(train_dir, class_name)
-                        os.makedirs(class_dir, exist_ok=True)
-                        for uploaded_file in uploaded_files:
-                            with open(os.path.join(class_dir, uploaded_file.name), "wb") as f:
-                                f.write(uploaded_file.getbuffer())
-
-        dir = [i for i in os.listdir(train_dir)]
-        data = image_dataset_from_directory(train_dir, batch_size=16, image_size=(224, 224), class_names=dir)
-
-        # One-hot encode the labels
-        def preprocess_data(x, y):
-            x = x / 255.0  # Normalize pixel values
-            y = tf.one_hot(y, depth=num_classes)  # One-hot encode labels
-            return x, y
-
-        data = data.map(preprocess_data)
-
-        model = build_model(num_classes)
-
-        
-        st.header(" Training the Model")
-        global epoch
-        epoch = st.slider("Enter the no of epochs you want to run.")
-
-
-        ################
+        import streamlit as st
+        import os
+        import tensorflow as tf
+        from tensorflow.keras.preprocessing import image_dataset_from_directory
+        from PIL import Image
+        import numpy as np
+        from tensorflow.keras import layers
+        from tensorflow.keras.models import Sequential
+        from tensorflow.keras.applications import ResNet101
         import cv2
         import imghdr
+
+
+        # Prompt user for the number of classes
+        num_classes = st.number_input("Enter the number of classes", min_value=1, step=1)
+
+        # Building the model
         
-        data_dir = "train_data"
-        image_ext = ['jpg','jpeg','png']
+        def build_model(num_classes):
+            base_model = ResNet101  (weights='imagenet', include_top=False, input_shape=(224, 224, 3))
+            base_model.trainable = False
+            model = Sequential([
+                base_model,
+                layers.GlobalAveragePooling2D(),
+                layers.Dense(num_classes, activation='softmax')
+            ])
+            model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01),
+                        loss='categorical_crossentropy',
+                        metrics=['accuracy'])
+            return model
+
+        def train(model, data):
+            status_text = st.empty()  # Create an empty element for dynamic updating
+            for epoc in range(epoch):
+                model.fit(data, epochs=1)  # Train for 1 epoch at a time
+                status_text.write(f"Epoch {epoc + 1} / {epoch} completed")  # Update the status
+            #model.save('image_classification.keras')
+
+        def main():
+            train_dir = "train_data"
+            os.makedirs(train_dir, exist_ok=True) 
+
+            for i in range(num_classes):
+                st.header(f"Class {i+1}")
+                class_name = st.text_input(f"Enter the name of class {i+1}")
+                form_key = f"class_{i}_{class_name}_uploader"
+                with st.form(key=form_key):
+                    file_uploader_key = f"class_{i}_{class_name}_uploader"
+                    uploaded_files = st.file_uploader(f"Choose images for class {class_name}", key=file_uploader_key, accept_multiple_files=True, type=['png', 'jpg', 'jpeg'])
+                    submit_button = st.form_submit_button(label='Submit')
+                    if submit_button:
+                        if uploaded_files:
+                            st.write("Sample Images:")
+                            num_images = min(len(uploaded_files), 5)
+                            num_columns = min(num_images, 5)
+                            columns = st.columns(num_columns)
+                            for i, uploaded_file in enumerate(uploaded_files[:num_images]):
+                                columns[i].image(uploaded_file, caption=uploaded_file.name, use_column_width=True)
+                            class_dir = os.path.join(train_dir, class_name)
+                            os.makedirs(class_dir, exist_ok=True)
+                            for uploaded_file in uploaded_files:
+                                with open(os.path.join(class_dir, uploaded_file.name), "wb") as f:
+                                    f.write(uploaded_file.getbuffer())
+
+            dir = [i for i in os.listdir(train_dir)]
+            data = image_dataset_from_directory(train_dir, batch_size=16, image_size=(224, 224), class_names=dir)
+
+            # One-hot encode the labels
+            def preprocess_data(x, y):
+                x = x / 255.0  # Normalize pixel values
+                y = tf.one_hot(y, depth=num_classes)  # One-hot encode labels
+                return x, y
+
+            data = data.map(preprocess_data)
+
+            model = build_model(num_classes)
+
+            
+            st.header(" Training the Model")
+            global epoch
+            epoch = st.slider("Enter the no of epochs you want to run.")
+
+
+            ################
+            
+            
+            data_dir = "train_data"
+            image_ext = ['jpg','jpeg','png']
+            
+            for image_class in os.listdir(data_dir):
+                for image in os.listdir(os.path.join(data_dir,image_class)):
+                    image_path = os.path.join(data_dir,image_class,image)
+                    try:
+                        img = cv2.imread(image_path)
+                        tip = imghdr.what(image_path)
+                        if tip not in image_ext:
+                            print("image not in extension list",image_path)
+                            os.remove(image_path)
+                    except Exception as e:
+                        print("Issue with image",image_path) 
+                
+            ################
+
+            if st.button("Train Model"):
+                train(model, data)
+
+            # Testing
+            st.title("Prediction")
+            option = st.radio("Select Input Option", ("Upload Image", "Use Camera"))
+            if option == "Upload Image":
+                uploaded_image = st.file_uploader("Upload an image for prediction", type=['png', 'jpg', 'jpeg'])
+            else:
+                uploaded_image = st.camera_input("Capture a image to be predicted")
+
+            if uploaded_image is not None:
+                
+                image = Image.open(uploaded_image)
+                image = image.resize((224, 224))
+                st.image(image, caption='Uploaded Image', use_column_width=True)
+                image = np.array(image) / 255.0  # Normalize pixel values
+                image = np.expand_dims(image, axis=0)  # Add batch dimension
+                prediction = model.predict(image)
+                predicted_class_index = np.argmax(prediction)
+                st.write(prediction)
+                st.write(f"Predicted class: {predicted_class_index}")
+                st.write(dir[predicted_class_index])
         
-        for image_class in os.listdir(data_dir):
-            for image in os.listdir(os.path.join(data_dir,image_class)):
-                image_path = os.path.join(data_dir,image_class,image)
-                try:
-                    img = cv2.imread(image_path)
-                    tip = imghdr.what(image_path)
-                    if tip not in image_ext:
-                        print("image not in extension list",image_path)
-                        os.remove(image_path)
-                except Exception as e:
-                    print("Issue with image",image_path) 
-            
-        ################
+        if __name__ == "__main__":
+            main()
 
-        if st.button("Train Model"):
-            train(model, data)
 
-        # Testing
-        st.title("Prediction")
-        option = st.radio("Select Input Option", ("Upload Image", "Use Camera"))
-        if option == "Upload Image":
-            uploaded_image = st.file_uploader("Upload an image for prediction", type=['png', 'jpg', 'jpeg'])
-        else:
-            uploaded_image = st.camera_input("Capture a image to be predicted")
+    elif choose == "Instructions":
+        col1,col2 = st.columns([2,1])
+        with col1:
+            st.image("image_classification/hero.jpg")
+        with col2:
+            st.header("Instructions")
+            st.write("This application allows users to create and train a custom image classification model using the ResNet50 architecture. ")
+            st.write("""
+                    - Enter no of classes you have.
+                    - Enter the name of the first class.
+                    - Upload and the images and reviw them.
+                    - Submit the images once reviewed.
+                    - Do the same this for all of the classes.
+                    - Select the number of epochs you want to train your model for.
+                    - Click on "Train" to train your model.
+                    - Upload the image using camera or upload file and predict the result.
 
-        if uploaded_image is not None:
-            
-            image = Image.open(uploaded_image)
-            image = image.resize((224, 224))
-            st.image(image, caption='Uploaded Image', use_column_width=True)
-            image = np.array(image) / 255.0  # Normalize pixel values
-            image = np.expand_dims(image, axis=0)  # Add batch dimension
-            prediction = model.predict(image)
-            predicted_class_index = np.argmax(prediction)
-            st.write(prediction)
-            st.write(f"Predicted class: {predicted_class_index}")
-            st.write(dir[predicted_class_index])
+            """)
+        st.header("How it works ?")
+        
+        select1, select2 = st.columns([1, 2])
 
-    if __name__ == "__main__":
-        main()
+        with select1:
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("###### Choose 'Train' from the above selectbox or drop-down menu.")
+
+        with select2:
+            st.video("image_classification/select.mp4", )
+
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+
+        # Second row with two columns
+        classes1, classes2 = st.columns([1, 1])
+
+        with classes1:
+            st.video("image_classification/class.mp4" )
+
+        with classes2: 
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("###### Select the number of classes that your model has.")
+
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+
+        # Second row with two columns
+        name1, name2 = st.columns([1, 2])
+
+        with name2:
+            st.video("image_classification/name.mp4" )
+
+        with name1: 
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("###### Enter the name of you first class.")
+
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+
+        # Second row with two columns
+        browse1, browse2 = st.columns([2, 1])
+
+        with browse1:
+            st.video("image_classification/browse.mp4" )
+
+        with browse2: 
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("###### Click on 'Browse file' and select the images of that class.")
+
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+
+        # Second row with two columns
+        submit1, submit2 = st.columns([1, 2])
+
+        with submit2:
+            st.video("image_classification/submit.mp4" )
+
+        with submit1: 
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("######  Click on submit once you can see the names of your images.")
+
+        st.write("")
+        st.write("")
+        st.write("")
+        st.write("")
+
+        # Second row with two columns
+        train1, train2 = st.columns([2, 1])
+
+        with train1:
+            st.video("image_classification/train.mp4" )
+
+        with train2: 
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("")
+            st.write("######  Select the no of epochs you want to train the model for and click on 'train' to start training the model.")
+
 
 
 
@@ -601,9 +722,6 @@ if selected == "🏠 House Price Prediction":
     import numpy as np
     import time
     import joblib
-
-
-    st.sidebar.markdown(" ### Navigation Bar")
 
 
     model = joblib.load("./house/model.joblib")
